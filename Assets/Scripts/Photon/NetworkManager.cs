@@ -5,12 +5,13 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class NetworkManager : MonoBehaviourPunCallbacks
 {
     [Header("DisconnectPanel")]
     public GameObject DisconnectPanel;
-    public Button Start;
+    public TMP_InputField NickNameInput;
 
     [Header("LobbyPanel")]
     public GameObject LobbyPanel;
@@ -26,10 +27,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     List<RoomInfo> myList = new List<RoomInfo>();
     int currentPage = 1, maxPage, multiple;
 
-
-
     #region 방리스트 갱신
-    // ◀버튼 -2 , ▶버튼 -1 , 셀 숫자
     public void MyListClick(int num)
     {
         if (num == -2) --currentPage;
@@ -40,20 +38,16 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     void MyListRenewal()
     {
-        // 최대페이지
         maxPage = (myList.Count % CellBtn.Length == 0) ? myList.Count / CellBtn.Length : myList.Count / CellBtn.Length + 1;
-
-        // 이전, 다음버튼
         PreviousBtn.interactable = (currentPage <= 1) ? false : true;
         NextBtn.interactable = (currentPage >= maxPage) ? false : true;
 
-        // 페이지에 맞는 리스트 대입
         multiple = (currentPage - 1) * CellBtn.Length;
         for (int i = 0; i < CellBtn.Length; i++)
         {
             CellBtn[i].interactable = (multiple + i < myList.Count) ? true : false;
-            CellBtn[i].transform.GetChild(0).GetComponent<Text>().text = (multiple + i < myList.Count) ? myList[multiple + i].Name : "";
-            CellBtn[i].transform.GetChild(1).GetComponent<Text>().text = (multiple + i < myList.Count) ? myList[multiple + i].PlayerCount + "/" + myList[multiple + i].MaxPlayers : "";
+            CellBtn[i].transform.GetChild(0).GetComponent<TMP_Text>().text = (multiple + i < myList.Count) ? myList[multiple + i].Name : "";
+            CellBtn[i].transform.GetChild(1).GetComponent<TMP_Text>().text = (multiple + i < myList.Count) ? myList[multiple + i].PlayerCount + "/" + myList[multiple + i].MaxPlayers : "";
         }
     }
 
@@ -73,11 +67,8 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-
     #region 서버연결
-    void Awake(){
-        Screen.SetResolution(960, 540, false);
-    }
+    void Awake() => Screen.SetResolution(960, 540, false);
 
     void Update()
     {
@@ -92,6 +83,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     {
         DisconnectPanel.SetActive(false);
         LobbyPanel.SetActive(true);
+        PhotonNetwork.LocalPlayer.NickName = NickNameInput.text;
         myList.Clear();
     }
 
@@ -104,7 +96,6 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     }
     #endregion
 
-
     #region 방
     public void CreateRoom() => PhotonNetwork.CreateRoom(RoomInput.text == "" ? "Room" + Random.Range(0, 100) : RoomInput.text, new RoomOptions { MaxPlayers = 2 });
 
@@ -114,7 +105,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        RoomRenewal();
+        SceneManager.LoadScene("Main"); // 방에 들어가면 GameScene으로 이동
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message) { RoomInput.text = ""; CreateRoom(); }
@@ -123,16 +114,12 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        RoomRenewal();
+        // 방 정보 갱신, 다른 플레이어가 들어왔을 때 처리 (필요 시)
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
-        RoomRenewal();
-    }
-
-    void RoomRenewal()
-    {
+        // 방 정보 갱신, 플레이어가 나갔을 때 처리 (필요 시)
     }
     #endregion
 }

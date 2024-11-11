@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class PlayerAction : MonoBehaviour
+public class PlayerAction : MonoBehaviourPun
 {
     public float speed;
     public GameManager manager;
@@ -24,6 +25,8 @@ public class PlayerAction : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // 로컬 플레이어만 제어
+        if (!photonView.IsMine) return;
         h = manager.isAciton ? 0 : Input.GetAxisRaw("Horizontal");
         v = manager.isAciton ? 0 : Input.GetAxisRaw("Vertical");
 
@@ -61,6 +64,8 @@ public class PlayerAction : MonoBehaviour
 
     void FixedUpdate()
     {
+        // 로컬 플레이어만 제어
+        if (!photonView.IsMine) return;
         //Move
         Vector2 moveVec = isHorizonMove ? new Vector2(h, 0) : new Vector2(0, v);
         rb.velocity = moveVec * speed;
