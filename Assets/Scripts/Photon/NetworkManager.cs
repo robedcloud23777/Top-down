@@ -105,7 +105,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        SceneManager.LoadScene("Main"); // 방에 들어가면 GameScene으로 이동
+        PhotonNetwork.LoadLevel("Main"); // 방에 들어가면 GameScene으로 이동
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message) { RoomInput.text = ""; CreateRoom(); }

@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 2471813810870531798}
   - component: {fileID: 2406175863864479621}
   - component: {fileID: 8028949640896574741}
+  - component: {fileID: 8366658221328248800}
+  - component: {fileID: 1333825456571931082}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -103,7 +105,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  manager: {fileID: 0}
 --- !u!50 &8325206917983941795
 Rigidbody2D:
   serializedVersion: 4
@@ -212,11 +213,13 @@ MonoBehaviour:
   ObservedComponentsFoldoutOpen: 1
   Group: 0
   prefixField: -1
-  Synchronization: 3
+  Synchronization: 2
   OwnershipTransfer: 0
   observableSearch: 2
   ObservedComponents:
   - {fileID: 8028949640896574741}
+  - {fileID: 8366658221328248800}
+  - {fileID: 1333825456571931082}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -236,3 +239,46 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 1
+--- !u!114 &8366658221328248800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3412359762125632619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e7cb724808c322458aa4d15f5035fa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizeVelocity: 1
+  m_SynchronizeAngularVelocity: 0
+  m_TeleportEnabled: 0
+  m_TeleportIfDistanceGreaterThan: 3
+--- !u!114 &1333825456571931082
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3412359762125632619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters:
+  - Type: 3
+    SynchronizeType: 2
+    Name: hAxisRaw
+  - Type: 3
+    SynchronizeType: 2
+    Name: vAxisRaw
+  - Type: 4
+    SynchronizeType: 2
+    Name: isChange
+  m_SynchronizeLayers:
+  - SynchronizeType: 2
+    LayerIndex: 0

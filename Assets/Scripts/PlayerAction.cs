@@ -6,7 +6,7 @@ using Photon.Pun;
 public class PlayerAction : MonoBehaviourPun
 {
     public float speed;
-    public GameManager manager;
+    private GameManager manager;
 
     float h, v;
     Rigidbody2D rb;
@@ -20,6 +20,7 @@ public class PlayerAction : MonoBehaviourPun
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
+        manager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     // Update is called once per frame
