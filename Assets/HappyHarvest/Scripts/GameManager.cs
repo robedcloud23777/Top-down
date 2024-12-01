@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cinemachine;
+using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
@@ -12,7 +13,7 @@ namespace HappyHarvest
     /// its Awake function is called as early as possible so the instance if valid on other Scripts. 
     /// </summary>
     [DefaultExecutionOrder(-9999)]
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviourPunCallbacks
     {
         private static GameManager s_Instance;
         
@@ -98,12 +99,38 @@ namespace HappyHarvest
                 Debug.LogError("The day length on the GameManager is set to 0, the length need to be set to a positive value");
             }
         }
+        private GameObject spawnPoint1;
+        private GameObject spawnPoint2;
 
         private void Start()
         {
+            spawnPoint1 = GameObject.Find("SpawnPoint1");
+            spawnPoint2 = GameObject.Find("SpawnPoint2");
+
             m_CurrentTimeOfTheDay = StartingTime;
             
             UIHandler.SceneLoaded();
+
+            PhotonNetwork.AutomaticallySyncScene = true; // 씬 자동 동기화 활성화
+            CreatePlayer(); // 플레이어가 입장 시 자동으로 Player 오브젝트를 생성
+        }
+
+        private void CreatePlayer()
+        {
+            // 플레이어 스폰 위치 계산
+            Vector3 spawnPosition1 = spawnPoint1.transform.position;
+            Vector3 spawnPosition2 = spawnPoint2.transform.position;
+            int i = 0;
+
+            if (i == 0)
+            {
+                // Photon에서 프리팹 인스턴스화 (Resources 폴더 내 경로 사용)
+                PhotonNetwork.Instantiate("Character", spawnPosition1, Quaternion.identity);
+                i++;
+            }else
+            {
+                PhotonNetwork.Instantiate("Character", spawnPosition2, Quaternion.identity);
+            }
         }
 
 #if UNITY_EDITOR
