@@ -8,6 +8,8 @@ namespace HappyHarvest
 {
     public class PlayerController : MonoBehaviour
     {
+        public Animator anim;
+        public int rank = 0;
         public InputActionAsset InputAction;
         public float Speed = 4.0f;
 
@@ -90,8 +92,9 @@ namespace HappyHarvest
         
         void Start()
         {
+            anim = GetComponentInChildren<Animator>();
             //Retrieve the action from the InputAction asset, enable them and add the callbacks.
-            
+
             //Move action doesn't have any callback as it will be polled in the movement code directly.
             m_MoveAction = InputAction.FindAction("Gameplay/Move");
             m_MoveAction.Enable();
@@ -137,6 +140,19 @@ namespace HappyHarvest
 
         private void Update()
         {
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
+            if (anim.GetInteger("hAxisRaw") != h)
+            {
+                anim.SetBool("isChange", true);
+                anim.SetInteger("hAxisRaw", (int)h);
+            }
+            else if (anim.GetInteger("vAxisRaw") != v)
+            {
+                anim.SetBool("isChange", true);
+                anim.SetInteger("vAxisRaw", (int)v);
+            }
+            else anim.SetBool("isChange", false);
             m_IsOverUI = EventSystem.current.IsPointerOverGameObject();
             m_CurrentInteractiveTarget = null;
             m_HasTarget = false;

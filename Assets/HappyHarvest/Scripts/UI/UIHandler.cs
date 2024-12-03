@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Template2DCommon;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Cursor = UnityEngine.Cursor;
@@ -14,6 +15,7 @@ namespace HappyHarvest
     /// </summary>
     public class UIHandler : MonoBehaviour
     {
+        private PlayerController playerController;
         protected static UIHandler s_Instance;
 
         public enum CursorType
@@ -121,12 +123,16 @@ namespace HappyHarvest
             m_SunLabel.AddManipulator(new Clickable(() => { GameManager.Instance.WeatherSystem?.ChangeWeather(WeatherSystem.WeatherType.Sun); }));
             m_RainLabel.AddManipulator(new Clickable(() => { GameManager.Instance.WeatherSystem?.ChangeWeather(WeatherSystem.WeatherType.Rain); }));
             m_ThunderLabel.AddManipulator(new Clickable(() => { GameManager.Instance.WeatherSystem?.ChangeWeather(WeatherSystem.WeatherType.Thunder); }));
+            playerController = GameObject.Find("Character").GetComponent<PlayerController>();
         }
         
         
         void Update()
         {
-            m_TimerLabel.text = GameManager.Instance.CurrentTimeAsString();
+            // m_TimerLabel.text = GameManager.Instance.CurrentTimeAsString();
+            if (playerController.rank == 0) {
+                m_TimerLabel.text = "Slave";
+            }
         }
 
         private void OnApplicationFocus(bool hasFocus)
@@ -202,8 +208,8 @@ namespace HappyHarvest
         public static void SceneLoaded()
         {
             //we hide the weather control if there is no weather sytsem in that scene
-            s_Instance.m_SunLabel.parent.style.display =
-                GameManager.Instance.WeatherSystem == null ? DisplayStyle.None : DisplayStyle.Flex;
+           // s_Instance.m_SunLabel.parent.style.display =
+               // GameManager.Instance.WeatherSystem == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         private void OpenMarket_Internal()

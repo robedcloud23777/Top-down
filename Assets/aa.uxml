@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Template name="GameUI" src="project://database/Assets/HappyHarvest/UI/GameUI.uxml?fileID=9197481963319205126&amp;guid=90544aa491e5e514197c2a1f559fc9f6&amp;type=3#GameUI" />
+    <ui:Instance template="GameUI" name="GameUI" style="opacity: 1;">
+        <AttributeOverrides element-name="Timer" display-tooltip-when-elided="false" />
+    </ui:Instance>
+</ui:UXML>
