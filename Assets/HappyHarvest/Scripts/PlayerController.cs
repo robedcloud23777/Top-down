@@ -68,6 +68,7 @@ namespace HappyHarvest
         private int m_DirXHash = Animator.StringToHash("DirX");
         private int m_DirYHash = Animator.StringToHash("DirY");
         private int m_SpeedHash = Animator.StringToHash("Speed");
+        private Vector2 movement;
 
         void Awake()
         {
@@ -140,17 +141,18 @@ namespace HappyHarvest
 
         private void Update()
         {
-            float h = Input.GetAxisRaw("Horizontal");
-            float v = Input.GetAxisRaw("Vertical");
-            if (anim.GetInteger("hAxisRaw") != h)
+            movement.x = Input.GetAxisRaw("Horizontal");
+            movement.y = Input.GetAxisRaw("Vertical");
+
+            if (anim.GetInteger("hAxisRaw") != movement.x)
             {
                 anim.SetBool("isChange", true);
-                anim.SetInteger("hAxisRaw", (int)h);
+                anim.SetInteger("hAxisRaw", (int)movement.x);
             }
-            else if (anim.GetInteger("vAxisRaw") != v)
+            else if (anim.GetInteger("vAxisRaw") != movement.y)
             {
                 anim.SetBool("isChange", true);
-                anim.SetInteger("vAxisRaw", (int)v);
+                anim.SetInteger("vAxisRaw", (int)movement.y);
             }
             else anim.SetBool("isChange", false);
             m_IsOverUI = EventSystem.current.IsPointerOverGameObject();
@@ -262,14 +264,7 @@ namespace HappyHarvest
                 SetLookDirectionFrom(move);
             }
 
-            var movement = move * Speed;
-            var speed = movement.sqrMagnitude;
-            
-            m_Animator.SetFloat(m_DirXHash, m_CurrentLookDirection.x);
-            m_Animator.SetFloat(m_DirYHash, m_CurrentLookDirection.y);
-            m_Animator.SetFloat(m_SpeedHash, speed);
-
-            m_Rigidbody.MovePosition(m_Rigidbody.position + movement * Time.deltaTime);
+            transform.Translate(movement * 4 * Time.fixedDeltaTime);
         }
 
         bool IsMouseOverGameWindow()

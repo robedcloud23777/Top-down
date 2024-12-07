@@ -174,7 +174,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3234746541622817088, guid: f4e3bcdb71b1ec546b54c73ed8e346fd, type: 3}
       propertyPath: m_Name
-      value: Character Variant
+      value: Character
+      objectReference: {fileID: 0}
+    - target: {fileID: 3234746541622817090, guid: f4e3bcdb71b1ec546b54c73ed8e346fd, type: 3}
+      propertyPath: m_Constraints
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3234746541622817091, guid: f4e3bcdb71b1ec546b54c73ed8e346fd, type: 3}
       propertyPath: m_RootOrder
