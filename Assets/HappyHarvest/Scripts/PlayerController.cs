@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -8,10 +9,12 @@ namespace HappyHarvest
 {
     public class PlayerController : MonoBehaviour
     {
-        public Animator anim;
+        public GameObject[] gameObjects;
+        public Animator[] anim;
+        private Animator curAnim;
         public int rank = 0;
         public InputActionAsset InputAction;
-        public float Speed = 4.0f;
+        public float speed = 4.0f;
 
         public SpriteRenderer Target;
         public Transform ItemAttachBone;
@@ -93,7 +96,6 @@ namespace HappyHarvest
         
         void Start()
         {
-            anim = GetComponentInChildren<Animator>();
             //Retrieve the action from the InputAction asset, enable them and add the callbacks.
 
             //Move action doesn't have any callback as it will be polled in the movement code directly.
@@ -141,20 +143,40 @@ namespace HappyHarvest
 
         private void Update()
         {
+            if (rank < 5)
+            {
+                curAnim = anim[0];
+                GameObject curObject = gameObjects[0];
+                curObject.SetActive(true);
+            }
+            else if (rank >= 5 && rank < 9)
+            {
+                curAnim = anim[1];
+                GameObject curObject = gameObjects[1];
+                curObject.SetActive(true);
+                speed = 5.0f;
+            }
+            else
+            {
+                curAnim = anim[2];
+                GameObject curObject = gameObjects[2];
+                curObject.SetActive(true);
+                speed = 6.0f;
+            }
             movement.x = Input.GetAxisRaw("Horizontal");
             movement.y = Input.GetAxisRaw("Vertical");
 
-            if (anim.GetInteger("hAxisRaw") != movement.x)
+            if (curAnim.GetInteger("hAxisRaw") != movement.x)
             {
-                anim.SetBool("isChange", true);
-                anim.SetInteger("hAxisRaw", (int)movement.x);
+                curAnim.SetBool("isChange", true);
+                curAnim.SetInteger("hAxisRaw", (int)movement.x);
             }
-            else if (anim.GetInteger("vAxisRaw") != movement.y)
+            else if (curAnim.GetInteger("vAxisRaw") != movement.y)
             {
-                anim.SetBool("isChange", true);
-                anim.SetInteger("vAxisRaw", (int)movement.y);
+                curAnim.SetBool("isChange", true);
+                curAnim.SetInteger("vAxisRaw", (int)movement.y);
             }
-            else anim.SetBool("isChange", false);
+            else curAnim.SetBool("isChange", false);
             m_IsOverUI = EventSystem.current.IsPointerOverGameObject();
             m_CurrentInteractiveTarget = null;
             m_HasTarget = false;
@@ -264,7 +286,7 @@ namespace HappyHarvest
                 SetLookDirectionFrom(move);
             }
 
-            transform.Translate(movement * 4 * Time.fixedDeltaTime);
+            transform.Translate(movement * speed * Time.fixedDeltaTime);
         }
 
         bool IsMouseOverGameWindow()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Template2DCommon;
 using Unity.VisualScripting;
@@ -15,6 +16,7 @@ namespace HappyHarvest
     /// </summary>
     public class UIHandler : MonoBehaviour
     {
+        private bool[] store = new bool[4];
         private PlayerController playerController;
         protected static UIHandler s_Instance;
 
@@ -31,7 +33,9 @@ namespace HappyHarvest
 
         [Header("UI Document")]
         public VisualTreeAsset MarketEntryTemplate;
-        
+        public VisualTreeAsset Gamble;
+        public VisualTreeAsset Rank;
+
         [Header("Sounds")] 
         public AudioClip MarketSellSound;
         
@@ -63,6 +67,10 @@ namespace HappyHarvest
         private Label m_SunLabel;
         private Label m_RainLabel;
         private Label m_ThunderLabel;
+
+        private string[] ranks = {"Slave 1", "Slave 2", "Slave 3", "Slave 4", "Slave 5","Common 1", "Common 2" , "Common 3" , "Common 4" , "Master" };
+        private float[] successRates = { 1.0f, 0.81f, 0.64f, 0.5f, 0.26f, 0.15f, 0.07f, 0.04f, 0.02f};
+        private int[] costToRankup = { 250, 500, 750, 1000, 1500, 2500, 5000, 7000, 9000, 10000 };
 
         void Awake()
         {
@@ -123,15 +131,42 @@ namespace HappyHarvest
             m_SunLabel.AddManipulator(new Clickable(() => { GameManager.Instance.WeatherSystem?.ChangeWeather(WeatherSystem.WeatherType.Sun); }));
             m_RainLabel.AddManipulator(new Clickable(() => { GameManager.Instance.WeatherSystem?.ChangeWeather(WeatherSystem.WeatherType.Rain); }));
             m_ThunderLabel.AddManipulator(new Clickable(() => { GameManager.Instance.WeatherSystem?.ChangeWeather(WeatherSystem.WeatherType.Thunder); }));
-            playerController = GameObject.Find("Character").GetComponent<PlayerController>();
+
+            StartCoroutine(InitializePlayerController());
+            for (int i = 0; i < 4; i++)
+            {
+                store[i] = false;
+            }
         }
-        
-        
+        private IEnumerator InitializePlayerController()
+        {
+            // Player 객체가 씬에 완전히 로드될 때까지 기다립니다
+            yield return new WaitForSeconds(0.1f); // 짧은 대기 시간 후
+
+            playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+            if (playerController == null)
+            {
+                Debug.LogError("PlayerController를 찾을 수 없습니다.");
+            }
+        }
+        private float timer = 10f;
+
         void Update()
         {
+            timer -= Time.deltaTime;
             // m_TimerLabel.text = GameManager.Instance.CurrentTimeAsString();
-            if (playerController.rank == 0) {
-                m_TimerLabel.text = "Slave";
+            m_TimerLabel.text = ranks[playerController.rank];
+            for (int i = 0; i < 4; i++)
+            {
+                if (store[i] == true && timer < 0)
+                {
+                    int currentCoins = GameManager.Instance.Player.Coins;
+                    int newCoins = currentCoins + 500;
+
+                    GameManager.Instance.Player.Coins = newCoins;
+                    UIHandler.UpdateCoins(newCoins);
+                    timer = 10f;
+                }
             }
         }
 
@@ -269,19 +304,19 @@ namespace HappyHarvest
                 m_MarketContentScrollview.Add(clone.contentContainer);
             }
         }
-        
+
         private void ToggleToBuy()
         {
             m_SellButton.RemoveFromClassList("activeButton");
             m_BuyButton.AddToClassList("activeButton");
-            
+
             m_BuyButton.SetEnabled(false);
             m_SellButton.SetEnabled(true);
-            
-            //clear all the existing entry. A good target for optimization if profiling show bad perf in UI is to pool
-            //instead of delete/recreate entries
+
+            // 기존 항목 삭제
             m_MarketContentScrollview.contentContainer.Clear();
 
+            // 기존 MarketEntries 처리
             for (int i = 0; i < GameManager.Instance.MarketEntries.Length; ++i)
             {
                 var item = GameManager.Instance.MarketEntries[i];
@@ -290,15 +325,15 @@ namespace HappyHarvest
 
                 clone.Q<Label>("ItemName").text = item.DisplayName;
                 clone.Q<VisualElement>("ItemIcone").style.backgroundImage = new StyleBackground(item.ItemSprite);
-                
-                var button = clone.Q<Button>("ActionButton");
 
-                if (GameManager.Instance.Player.Coins >= item.BuyPrice)
+                var button = clone.Q<Button>("ActionButton");
+                button.text = $"Buy 1 for {item.BuyPrice}";
+                int i1 = i;
+                button.clicked += () =>
                 {
-                    button.text = $"Buy 1 for {item.BuyPrice}";
-                    int i1 = i;
-                    button.clicked += () =>
+                    if (GameManager.Instance.Player.Coins >= item.BuyPrice)
                     {
+
                         if (GameManager.Instance.Player.BuyItem(item))
                         {
                             if (GameManager.Instance.Player.Coins < item.BuyPrice)
@@ -307,18 +342,111 @@ namespace HappyHarvest
                                 button.SetEnabled(false);
                             }
                         }
-                    };
+                    }
+                };
+                m_MarketContentScrollview.Add(clone.contentContainer);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                var clone = MarketEntryTemplate.CloneTree();
+
+                clone.Q<Label>("ItemName").text = $"Buy Store {i+1}";
+                clone.Q<VisualElement>("ItemIcone").style.backgroundImage = new StyleBackground();
+
+                var button = clone.Q<Button>("ActionButton");
+                button.text = "5000 coins";
+                int i1 = i;
+                if (playerController.rank < 5) {
+                    button.SetEnabled(false);
+                }else
+                {
                     button.SetEnabled(true);
+                }
+                button.clicked += () =>
+                {
+                if (GameManager.Instance.Player.Coins >= 5000 && store[i1] != true)
+                    {
+                        int currentCoins = GameManager.Instance.Player.Coins;
+                        int newCoins = currentCoins - 5000;
+
+                        GameManager.Instance.Player.Coins = newCoins;
+                        UIHandler.UpdateCoins(newCoins);
+                        store[i1] = true;
+                    }
+                };
+
+                m_MarketContentScrollview.Add(clone.contentContainer);
+            }
+
+            // Gamble 항목 추가
+            var gambleClone = Gamble.CloneTree();
+            gambleClone.Q<Label>("ItemName").text = "Gamble(x1.5)";
+            gambleClone.Q<VisualElement>("ItemIcone").style.backgroundImage = new StyleBackground(/* Gamble 이미지 추가 */);
+
+            var gambleButton = gambleClone.Q<Button>("ActionButton");
+            gambleButton.text = "Try Your Luck!";
+            gambleButton.clicked += () =>
+            {
+                int currentCoins = GameManager.Instance.Player.Coins;
+
+                if (currentCoins > 0)
+                {
+                    bool win = UnityEngine.Random.value < 0.75f; // 75% 확률
+                    float multiplier = win ? 1.5f : 0.5f;
+                    int newCoins = Mathf.FloorToInt(currentCoins * multiplier);
+
+                    GameManager.Instance.Player.Coins = newCoins;
+                    UIHandler.UpdateCoins(newCoins);
+
+                    string result = win ? "Congratulations! You won!" : "Oh no, you lost...";
+                    Debug.Log($"{result} Your coins are now: {newCoins}");
                 }
                 else
                 {
-                    button.text = $"Cannot afford cost of {item.BuyPrice}";
-                    button.SetEnabled(false);
+                    Debug.Log("You need coins to gamble!");
                 }
-                
-                m_MarketContentScrollview.Add(clone.contentContainer);
-            }
+            };
+
+            m_MarketContentScrollview.Add(gambleClone.contentContainer);
+
+            // Rank 항목 추가
+            var rankClone = Rank.CloneTree();
+            rankClone.Q<Label>("ItemName").text = $"Rank Up to {ranks[playerController.rank + 1]}";
+            rankClone.Q<VisualElement>("ItemIcone").style.backgroundImage = new StyleBackground(/* Rank 이미지 추가 */);
+
+            var rankButton = rankClone.Q<Button>("ActionButton");
+            rankButton.text = $"{costToRankup[playerController.rank]} coins";
+            rankButton.clicked += () =>
+            {
+                int currentCoins = GameManager.Instance.Player.Coins;
+                int newCoins = currentCoins - costToRankup[playerController.rank];
+
+                GameManager.Instance.Player.Coins = newCoins;
+                UIHandler.UpdateCoins(newCoins);
+                float successRate = successRates[playerController.rank];
+
+                bool isSuccess = UnityEngine.Random.value < successRate;
+                if (currentCoins >= costToRankup[playerController.rank])
+                {
+                    if (isSuccess)
+                    {
+                        playerController.rank++;
+                        Debug.Log($"강화 성공! 현재 랭크: {ranks[playerController.rank]}");
+                    }
+                    else
+                    {
+                        Debug.Log($"강화 실패... 현재 랭크 유지: {ranks[playerController.rank]}");
+                    }
+                }
+
+                // UI 업데이트 (예: 랭크 정보 업데이트)
+                m_TimerLabel.text = ranks[playerController.rank];
+            };
+
+            m_MarketContentScrollview.Add(rankClone.contentContainer);
         }
+
 
         public static void PlayBuySellSound(Vector3 location)
         {
